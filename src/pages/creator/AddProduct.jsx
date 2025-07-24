@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 const AddProduct = () => {
   const [productData, setProductData] = useState({
@@ -28,8 +29,35 @@ const AddProduct = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement product submission logic
-    console.log('Product data:', productData);
+    try {
+      const formData = new FormData();
+      formData.append('name', productData.name);
+      formData.append('description', productData.description);
+      formData.append('price', productData.price);
+      formData.append('category', productData.category);
+      formData.append('stock', productData.stock);
+
+      // Append images
+      productData.images.forEach((file) => {
+        formData.append('images', file);
+      });
+
+      const response = await axios.post(
+        'https://ququbackendl.onrender.com/api/products',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+
+      console.log('Product added successfully:', response.data);
+      alert("Product added successfully!");
+    } catch (error) {
+      console.error('Upload failed:', error.response?.data || error.message);
+      alert("Error uploading product");
+    }
   };
 
   return (
@@ -184,4 +212,4 @@ const AddProduct = () => {
   );
 };
 
-export default AddProduct; 
+export default AddProduct;
