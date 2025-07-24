@@ -5,7 +5,7 @@ export const AUTH_ERROR_EVENT = 'auth_error';
 
 // Create axios instance with base URL
 const api = axios.create({
-  baseURL: 'http://localhost:5000',
+  baseURL: 'https://ququbackendl.onrender.com',
   headers: {
     'Content-Type': 'application/json'
   },
