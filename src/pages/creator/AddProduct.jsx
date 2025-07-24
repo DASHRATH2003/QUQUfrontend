@@ -10,6 +10,8 @@ const AddProduct = () => {
     stock: '',
     images: []
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -17,45 +19,79 @@ const AddProduct = () => {
       ...prev,
       [name]: value
     }));
+    setError(null); // Clear error when input changes
   };
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
+    // Validate file size (max 2MB)
+    const validFiles = files.filter(file => file.size <= 2 * 1024 * 1024);
+    if (validFiles.length < files.length) {
+      setError('Image size should be less than 2MB');
+      return;
+    }
     setProductData(prev => ({
       ...prev,
-      images: files
+      images: validFiles
     }));
+    setError(null);
+  };
+
+  const validateForm = () => {
+    if (!productData.name) return 'Name is required';
+    if (!productData.description) return 'Description is required';
+    if (!productData.price || productData.price <= 0) return 'Valid price is required';
+    if (!productData.category) return 'Category is required';
+    if (!productData.stock || productData.stock < 0) return 'Valid stock quantity is required';
+    if (!productData.images.length) return 'Product image is required';
+    return null;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
     try {
       const formData = new FormData();
-      formData.append('name', productData.name);
-      formData.append('description', productData.description);
-      formData.append('price', productData.price);
+      formData.append('name', productData.name.trim());
+      formData.append('description', productData.description.trim());
+      formData.append('price', parseFloat(productData.price).toFixed(2));
       formData.append('category', productData.category);
-      formData.append('stock', productData.stock);
+      formData.append('stock', parseInt(productData.stock));
 
-      // Append single image (first image only for now)
+      // Append single image
       if (productData.images.length > 0) {
-        formData.append('image', productData.images[0]);
-      } else {
-        throw new Error('Please select an image');
+        const imageFile = productData.images[0];
+        // Validate file type
+        if (!imageFile.type.startsWith('image/')) {
+          throw new Error('Please upload a valid image file');
+        }
+        formData.append('image', imageFile);
       }
 
-      const response = await api.post(
-        '/api/products',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        }
-      );
+      // Log formData contents for debugging
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
+
+      const response = await api.post('/api/products', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity
+      });
 
       console.log('Product added successfully:', response.data);
       alert("Product added successfully!");
+      
       // Clear form
       setProductData({
         name: '',
@@ -65,9 +101,16 @@ const AddProduct = () => {
         stock: '',
         images: []
       });
+      
+      // Reset file input
+      const fileInput = document.getElementById('images');
+      if (fileInput) fileInput.value = '';
+      
     } catch (error) {
       console.error('Upload failed:', error.response?.data || error.message);
-      alert(error.response?.data?.message || "Error uploading product. Please check all fields and try again.");
+      setError(error.response?.data?.message || error.message || "Error uploading product. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -76,11 +119,17 @@ const AddProduct = () => {
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">Add New Product</h1>
         
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Product Name */}
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-              Product Name
+              Product Name *
             </label>
             <input
               type="text"
@@ -96,7 +145,7 @@ const AddProduct = () => {
           {/* Description */}
           <div>
             <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-              Description
+              Description *
             </label>
             <textarea
               id="description"
@@ -113,13 +162,13 @@ const AddProduct = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="price" className="block text-sm font-medium text-gray-700">
-                Price ($)
+                Price (£) *
               </label>
               <input
                 type="number"
                 id="price"
                 name="price"
-                min="0"
+                min="0.01"
                 step="0.01"
                 value={productData.price}
                 onChange={handleInputChange}
@@ -129,7 +178,7 @@ const AddProduct = () => {
             </div>
             <div>
               <label htmlFor="stock" className="block text-sm font-medium text-gray-700">
-                Stock Quantity
+                Stock Quantity *
               </label>
               <input
                 type="number"
@@ -147,7 +196,7 @@ const AddProduct = () => {
           {/* Category */}
           <div>
             <label htmlFor="category" className="block text-sm font-medium text-gray-700">
-              Category
+              Category *
             </label>
             <select
               id="category"
@@ -167,7 +216,7 @@ const AddProduct = () => {
           {/* Image Upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Product Images
+              Product Image * (Max 2MB)
             </label>
             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
               <div className="space-y-1 text-center">
@@ -190,20 +239,18 @@ const AddProduct = () => {
                     htmlFor="images"
                     className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
                   >
-                    <span>Upload files</span>
+                    <span>Upload a file</span>
                     <input
                       id="images"
                       name="images"
                       type="file"
-                      multiple
                       accept="image/*"
                       className="sr-only"
                       onChange={handleImageUpload}
                     />
                   </label>
-                  <p className="pl-1">or drag and drop</p>
                 </div>
-                <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                <p className="text-xs text-gray-500">PNG, JPG up to 2MB</p>
               </div>
             </div>
           </div>
@@ -212,9 +259,12 @@ const AddProduct = () => {
           <div className="flex justify-end">
             <button
               type="submit"
-              className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              disabled={loading}
+              className={`${
+                loading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
+              } text-white py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
             >
-              Add Product
+              {loading ? 'Adding Product...' : 'Add Product'}
             </button>
           </div>
         </form>
