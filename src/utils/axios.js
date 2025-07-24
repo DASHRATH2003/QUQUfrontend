@@ -3,9 +3,14 @@ import axios from 'axios';
 // Custom event for authentication errors
 export const AUTH_ERROR_EVENT = 'auth_error';
 
+// Dynamically set base URL
+const baseURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:5000'
+  : 'https://ququbackendl.onrender.com';
+
 // Create axios instance with base URL
 const api = axios.create({
-  baseURL: 'https://ququbackendl.onrender.com',
+  baseURL,
   headers: {
     'Content-Type': 'application/json'
   },
@@ -21,16 +26,13 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // Add response interceptor for error handling
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Check if error is authentication related (401 or 403)
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
       window.dispatchEvent(new Event(AUTH_ERROR_EVENT));
     }
@@ -39,5 +41,4 @@ api.interceptors.response.use(
   }
 );
 
-export default api; 
-
+export default api;

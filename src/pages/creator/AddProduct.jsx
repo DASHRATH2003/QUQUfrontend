@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../../utils/axios';
 
 const AddProduct = () => {
   const [productData, setProductData] = useState({
@@ -37,13 +37,15 @@ const AddProduct = () => {
       formData.append('category', productData.category);
       formData.append('stock', productData.stock);
 
-      // Append images
-      productData.images.forEach((file) => {
-        formData.append('images', file);
-      });
+      // Append single image (first image only for now)
+      if (productData.images.length > 0) {
+        formData.append('image', productData.images[0]);
+      } else {
+        throw new Error('Please select an image');
+      }
 
-      const response = await axios.post(
-        'https://ququbackendl.onrender.com/api/products',
+      const response = await api.post(
+        '/api/products',
         formData,
         {
           headers: {
@@ -54,9 +56,18 @@ const AddProduct = () => {
 
       console.log('Product added successfully:', response.data);
       alert("Product added successfully!");
+      // Clear form
+      setProductData({
+        name: '',
+        description: '',
+        price: '',
+        category: '',
+        stock: '',
+        images: []
+      });
     } catch (error) {
       console.error('Upload failed:', error.response?.data || error.message);
-      alert("Error uploading product");
+      alert(error.response?.data?.message || "Error uploading product. Please check all fields and try again.");
     }
   };
 
