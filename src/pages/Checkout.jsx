@@ -247,16 +247,9 @@ const Checkout = () => {
                 <CreditCardIcon className="w-6 h-6 text-gray-600" />
                 <h2 className="text-xl font-semibold text-gray-900">Payment Method</h2>
               </div>
-              <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                <p className="text-sm text-gray-600">
-                  Please fill in all delivery information with valid details. UK postcode format required (e.g., SW1A 1AA).
-                </p>
-              </div>
+             
               <PayPalButton formData={formData} />
               <div className="mt-6 text-center">
-                <p className="text-sm text-gray-500">
-                  Safe and secure payments by PayPal
-                </p>
                 <div className="flex justify-center items-center gap-2 mt-2">
                   <svg className="w-8 h-8 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.72a.641.641 0 0 1 .634-.542h6.556c2.153 0 3.71.424 4.63 1.26.875.795 1.276 1.961 1.276 3.523 0 1.398-.376 2.617-1.125 3.627-.766 1.026-1.863 1.738-3.266 2.115-.656.175-1.4.262-2.228.262h-.804c-.655 0-1.214.477-1.317 1.124l-.099.58-.964 6.092a.64.64 0 0 1-.633.576z"/>

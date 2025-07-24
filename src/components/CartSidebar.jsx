@@ -4,7 +4,7 @@ import { useCart } from '../context/CartContext';
 import { Link } from 'react-router-dom';
 
 const CartSidebar = ({ isOpen, onClose }) => {
-  const { cartItems, removeFromCart, updateQuantity, getTotalPrice, formatPrice } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, getTotalPrice } = useCart();
 
   if (!isOpen) return null;
 

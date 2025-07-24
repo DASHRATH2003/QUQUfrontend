@@ -1,21 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
+import { formatPrice, debounce } from '../utils/cartHelpers';
 
-const CartContext = createContext();
-
-// Helper function to format price to 2 decimal places
-const formatPrice = (price) => {
-  return parseFloat(price.toFixed(2));
-};
-
-// Debounce helper
-const debounce = (func, wait) => {
-  let timeout;
-  return (...args) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-};
+export const CartContext = createContext();
 
 export const useCart = () => {
   const context = useContext(CartContext);
@@ -37,59 +24,63 @@ export const CartProvider = ({ children }) => {
     }
   });
 
-  // Save cart to localStorage whenever it changes
-  useEffect(() => {
-    try {
-      localStorage.setItem('cart', JSON.stringify(cartItems));
-    } catch (error) {
-      console.error('Error saving cart:', error);
-    }
-  }, [cartItems]);
-
-  // Debounced toast notification
-  const showToast = useCallback(
-    debounce((message) => {
-      toast.success(message, {
-        duration: 1000,
-        position: 'top-right',
-        style: {
-          background: '#333',
-          color: '#fff',
-          padding: '4px 8px',
-          fontSize: '14px',
-          borderRadius: '4px',
-        },
-      });
+  // Optimized localStorage update with debounce
+  const debouncedSaveCart = useCallback(
+    debounce((items) => {
+      try {
+        localStorage.setItem('cart', JSON.stringify(items));
+      } catch (error) {
+        console.error('Error saving cart:', error);
+      }
     }, 300),
     []
   );
+
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    debouncedSaveCart(cartItems);
+  }, [cartItems, debouncedSaveCart]);
+
+  // Optimized toast notification with immediate feedback
+  const showToast = useCallback((message) => {
+    toast.success(message, {
+      duration: 1000,
+      position: 'top-right',
+      style: {
+        background: '#333',
+        color: '#fff',
+        padding: '4px 8px',
+        fontSize: '14px',
+        borderRadius: '4px',
+      },
+    });
+  }, []);
 
   // Add item to cart - optimized for instant response
   const addToCart = useCallback((product, quantity = 1) => {
     if (!product?.id) return;
 
+    // Show notification immediately before state update
+    showToast(
+      cartItems.find(item => item.id === product.id)
+        ? `+${quantity} ${product.name}`
+        : `Added ${product.name}`
+    );
+
+    // Immediate UI update
     setCartItems(prevItems => {
       const existingItem = prevItems.find(item => item.id === product.id);
       
       // Update or add new item
-      const newItems = existingItem
+      return existingItem
         ? prevItems.map(item =>
             item.id === product.id
               ? { ...item, quantity: item.quantity + quantity }
               : item
           )
         : [...prevItems, { ...product, quantity }];
-
-      // Show notification with debounce
-      showToast(
-        existingItem 
-          ? `+${quantity} ${product.name}`
-          : `Added ${product.name}`
-      );
-
-      return newItems;
     });
-  }, [showToast]);
+  }, [showToast, cartItems]);
 
   // Remove item from cart - optimized for instant response
   const removeFromCart = useCallback((productId) => {
