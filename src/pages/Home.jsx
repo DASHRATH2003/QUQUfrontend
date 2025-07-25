@@ -412,7 +412,7 @@ const Home = () => {
                 <img
                   src={slide.image}
                   alt={slide.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover object-center"
                 />
               </div>
             </div>
@@ -496,7 +496,7 @@ const Home = () => {
             .map((product) => (
               <div
                 key={product.id}
-                className="w-[200px] md:w-[260px] flex-shrink-0 transition-transform hover:scale-105 duration-300"
+                className="w-[160px] sm:w-[200px] md:w-[260px] flex-shrink-0 transition-transform hover:scale-105 duration-300"
               >
                 <FragranceCard fragrance={product} />
               </div>
@@ -843,9 +843,10 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
+          {/* Instagram Feed Grid */}
+          <div className="grid grid-cols-3 gap-2 md:gap-4 max-w-4xl mx-auto">
             {instagramImages
-              .slice(0, showMoreImages ? 12 : 6)
+              .slice(0, showMoreImages ? 6 : 6)
               .map((image, index) => (
                 <div
                   key={index}
@@ -854,7 +855,7 @@ const Home = () => {
                   <img
                     src={image.src}
                     alt={image.alt}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300"></div>
                 </div>
@@ -862,12 +863,257 @@ const Home = () => {
           </div>
 
           <div className="text-center mt-4 md:mt-8">
-            <button
-              onClick={() => setShowMoreImages(!showMoreImages)}
-              className="bg-pink-100 hover:bg-pink-200 text-black px-4 md:px-8 py-2 md:py-3 rounded-md text-sm md:text-base font-medium transition-colors duration-200"
+            <Link
+              to="/shop"
+              className="inline-block bg-pink-100 hover:bg-pink-200 text-black px-4 md:px-8 py-2 md:py-3 rounded-md text-sm md:text-base font-medium transition-colors duration-200"
             >
-              {showMoreImages ? "Show Less" : "Load more"}
-            </button>
+              View All Products
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* New Featured Products Section */}
+      <div className="w-full bg-gradient-to-r from-pink-50 to-purple-50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Discover Our Bestsellers
+            </h2>
+            <div className="flex justify-center space-x-4 mb-6">
+              <div className="w-16 h-[2px] bg-pink-200"></div>
+              <div className="w-16 h-[2px] bg-pink-300"></div>
+              <div className="w-16 h-[2px] bg-pink-400"></div>
+            </div>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Explore our most loved fragrances that have captured hearts worldwide
+            </p>
+          </div>
+
+          {/* Featured Products Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-8">
+            {/* Featured Product 1 */}
+            <div className="group relative overflow-hidden rounded-lg shadow-lg transform transition-transform duration-300 hover:scale-105">
+              <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden">
+                <img
+                  src="/images/perfume3.jpeg"
+                  alt="Luxury Perfume"
+                  className="w-full h-full object-cover object-center transform transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 p-6 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                <h3 className="text-xl font-bold mb-2">Midnight Dreams</h3>
+                <p className="text-sm mb-4">A captivating blend of exotic notes</p>
+                <Link
+                  to="/product/midnight-dreams"
+                  className="inline-block bg-white text-black px-6 py-2 rounded-full text-sm font-medium hover:bg-pink-100 transition-colors duration-200"
+                >
+                  Explore Now
+                </Link>
+              </div>
+            </div>
+
+            {/* Featured Product 2 */}
+            <div className="group relative overflow-hidden rounded-lg shadow-lg transform transition-transform duration-300 hover:scale-105">
+              <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden">
+                <img
+                  src="/images/perfume4.jpg"
+                  alt="Premium Collection"
+                  className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 p-6 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                <h3 className="text-xl font-bold mb-2">Royal Essence</h3>
+                <p className="text-sm mb-4">Elegance captured in a bottle</p>
+                <Link
+                  to="/product/royal-essence"
+                  className="inline-block bg-white text-black px-6 py-2 rounded-full text-sm font-medium hover:bg-pink-100 transition-colors duration-200"
+                >
+                  Explore Now
+                </Link>
+              </div>
+            </div>
+
+            {/* Featured Product 3 */}
+            <div className="group relative overflow-hidden rounded-lg shadow-lg transform transition-transform duration-300 hover:scale-105">
+              <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden">
+                <img
+                  src="/images/perfume5.webp"
+                  alt="Signature Collection"
+                  className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 p-6 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                <h3 className="text-xl font-bold mb-2">Ocean Breeze</h3>
+                <p className="text-sm mb-4">Fresh and invigorating scents</p>
+                <Link
+                  to="/product/ocean-breeze"
+                  className="inline-block bg-white text-black px-6 py-2 rounded-full text-sm font-medium hover:bg-pink-100 transition-colors duration-200"
+                >
+                  Explore Now
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center mt-12">
+            <Link
+              to="/shop"
+              className="inline-block bg-black text-white px-8 py-3 rounded-full text-lg font-medium hover:bg-pink-600 transition-colors duration-200"
+            >
+              View All Collections
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* New Content Section */}
+      <div className="w-full bg-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Why Choose QUQU London?
+            </h2>
+            <div className="flex justify-center space-x-4 mb-6">
+              <div className="w-16 h-[2px] bg-pink-200"></div>
+              <div className="w-16 h-[2px] bg-pink-300"></div>
+              <div className="w-16 h-[2px] bg-pink-400"></div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Quality Card */}
+            <div className="bg-gradient-to-br from-pink-50 to-purple-50 p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="flex items-center justify-center h-12 w-12 rounded-full bg-pink-100 mx-auto mb-6">
+                <svg className="h-6 w-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 text-center mb-4">Premium Quality</h3>
+              <p className="text-gray-600 text-center">
+                Each fragrance is crafted with the finest ingredients, ensuring a long-lasting and sophisticated scent experience.
+              </p>
+            </div>
+
+            {/* Sustainability Card */}
+            <div className="bg-gradient-to-br from-pink-50 to-purple-50 p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mx-auto mb-6">
+                <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 text-center mb-4">Sustainable Practices</h3>
+              <p className="text-gray-600 text-center">
+                We're committed to eco-friendly packaging and sustainable sourcing methods to protect our planet.
+              </p>
+            </div>
+
+            {/* Innovation Card */}
+            <div className="bg-gradient-to-br from-pink-50 to-purple-50 p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="flex items-center justify-center h-12 w-12 rounded-full bg-purple-100 mx-auto mb-6">
+                <svg className="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 text-center mb-4">Innovative Formulas</h3>
+              <p className="text-gray-600 text-center">
+                Our research team continuously develops new fragrances that push the boundaries of perfumery.
+              </p>
+            </div>
+          </div>
+
+          {/* Features List */}
+          <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">What Sets Us Apart</h3>
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <div className="flex items-center justify-center h-6 w-6 rounded-full bg-pink-100">
+                      <svg className="h-4 w-4 text-pink-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="ml-3 text-gray-600">Expertly crafted fragrances for every occasion</p>
+                </div>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <div className="flex items-center justify-center h-6 w-6 rounded-full bg-pink-100">
+                      <svg className="h-4 w-4 text-pink-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="ml-3 text-gray-600">Cruelty-free and ethically sourced ingredients</p>
+                </div>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <div className="flex items-center justify-center h-6 w-6 rounded-full bg-pink-100">
+                      <svg className="h-4 w-4 text-pink-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="ml-3 text-gray-600">Long-lasting scents that evolve throughout the day</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">Our Commitment</h3>
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <div className="flex items-center justify-center h-6 w-6 rounded-full bg-pink-100">
+                      <svg className="h-4 w-4 text-pink-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="ml-3 text-gray-600">100% satisfaction guarantee on all products</p>
+                </div>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <div className="flex items-center justify-center h-6 w-6 rounded-full bg-pink-100">
+                      <svg className="h-4 w-4 text-pink-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="ml-3 text-gray-600">Expert customer service and fragrance consultation</p>
+                </div>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <div className="flex items-center justify-center h-6 w-6 rounded-full bg-pink-100">
+                      <svg className="h-4 w-4 text-pink-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="ml-3 text-gray-600">Regular new releases and seasonal collections</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Call to Action */}
+          <div className="mt-16 text-center">
+            <div className="inline-flex flex-col items-center">
+              <p className="text-lg text-gray-600 mb-6 max-w-2xl">
+                Experience the difference of premium fragrances crafted with passion and precision.
+                Join thousands of satisfied customers who have found their signature scent with QUQU London.
+              </p>
+              <Link
+                to="/shop"
+                className="inline-block bg-black text-white px-8 py-3 rounded-full text-lg font-medium hover:bg-pink-600 transition-colors duration-200"
+              >
+                Explore Our Collection
+              </Link>
+            </div>
           </div>
         </div>
       </div>

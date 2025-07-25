@@ -160,7 +160,7 @@ const Bestsellers = () => {
                   {/* Price and CTA */}
                   <div className="flex items-center justify-between pt-2">
                     <span className="text-lg font-semibold text-gray-900">
-                      £{(product.price * 0.0096).toFixed(2)}
+                      £{product.price.toFixed(2)}
                     </span>
                     <button 
                       onClick={(e) => handleAddToCart(e, product)}

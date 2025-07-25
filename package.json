@@ -13,6 +13,7 @@
     "@heroicons/react": "2.0.18",
     "@paypal/checkout-server-sdk": "^1.0.3",
     "@paypal/react-paypal-js": "^8.8.3",
+    "@react-google-maps/api": "^2.20.7",
     "@reduxjs/toolkit": "^2.8.2",
     "axios": "^1.10.0",
     "chart.js": "^4.5.0",

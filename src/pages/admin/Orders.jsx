@@ -43,12 +43,12 @@ const AdminOrders = () => {
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
-      await api.put(`/api/orders/${orderId}/status`, { status: newStatus });
+      await api.put(`/api/orders/${orderId}/status`, { orderStatus: newStatus });
       toast.success('Order status updated successfully');
       fetchOrders(currentPage);
     } catch (error) {
       console.error('Error updating order status:', error);
-      toast.error('Failed to update order status');
+      toast.error(error.response?.data?.message || 'Failed to update order status');
     }
   };
 
