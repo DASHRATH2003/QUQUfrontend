@@ -113,11 +113,9 @@ const Navbar = () => {
   return (
     <header className="w-full bg-white">
       {/* Announcement Bar */}
-      <div className="w-full bg-pink-100 py-2 text-center whitespace-nowrap">
-        <Link to="/shop" className="text-gray-700 hover:text-gray-800">
-        Whiff of Warmth™ – Solid Perfume That Feels Like a Hug →
-
-
+      <div className="w-full bg-pink-100 px-4 py-2.5 text-center">
+        <Link to="/shop" className="text-gray-700 hover:text-gray-800 text-sm sm:text-base inline-block">
+          Whiff of Warmth™ – Solid Perfume That Feels Like a Hug →
         </Link>
       </div>
 
