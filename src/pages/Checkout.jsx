@@ -31,6 +31,7 @@ const Checkout = () => {
     postcode: ''
   });
   const [currentStep, setCurrentStep] = useState(1);
+  const [deliveryOption, setDeliveryOption] = useState('standard'); // Add this line
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -38,6 +39,18 @@ const Checkout = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleDeliveryOptionChange = (option) => { // Add this function
+    setDeliveryOption(option);
+  };
+
+  const getShippingCost = () => { // Add this function
+    return deliveryOption === 'express' ? 4.99 : 0;
+  };
+
+  const getTotalWithShipping = () => { // Add this function
+    return (parseFloat(getTotalPrice()) + getShippingCost()).toFixed(2);
   };
 
   const handleQuantityChange = (itemId, newQuantity) => {
@@ -207,7 +220,8 @@ const Checkout = () => {
                     type="radio"
                     name="delivery"
                     value="standard"
-                    defaultChecked
+                    checked={deliveryOption === 'standard'}
+                    onChange={() => handleDeliveryOptionChange('standard')}
                     className="h-4 w-4 text-pink-500 focus:ring-pink-500"
                   />
                   <div className="ml-3 flex-1">
@@ -222,6 +236,8 @@ const Checkout = () => {
                     type="radio"
                     name="delivery"
                     value="express"
+                    checked={deliveryOption === 'express'}
+                    onChange={() => handleDeliveryOptionChange('express')}
                     className="h-4 w-4 text-pink-500 focus:ring-pink-500"
                   />
                   <div className="ml-3 flex-1">
@@ -316,11 +332,13 @@ const Checkout = () => {
                     </div>
                     <div className="flex justify-between text-sm">
                       <p className="text-gray-600">Shipping</p>
-                      <p className="font-medium text-gray-900">Free</p>
+                      <p className="font-medium text-gray-900">
+                        {getShippingCost() === 0 ? 'Free' : `£${getShippingCost().toFixed(2)}`}
+                      </p>
                     </div>
                     <div className="flex justify-between text-base font-medium">
                       <p className="text-gray-900">Total</p>
-                      <p className="text-gray-900">£{getTotalPrice()}</p>
+                      <p className="text-gray-900">£{getTotalWithShipping()}</p>
                     </div>
                   </div>
 
