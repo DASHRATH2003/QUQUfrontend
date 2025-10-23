@@ -141,7 +141,7 @@ const OrderHistory = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Total amount</p>
-                  <p className="font-medium">£{order.totalAmount.toFixed(2)}</p>
+                  <p className="font-medium">£{Number(order.totalAmount ?? 0).toFixed(2)}</p>
                 </div>
                 <div>
                   <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium gap-1.5
@@ -160,28 +160,39 @@ const OrderHistory = () => {
 
             {/* Order Items */}
             <div className="divide-y divide-gray-100">
-              {order.products.map((item, index) => (
-                <div key={index} className="p-6 flex items-center gap-6">
-                  <div className="flex-shrink-0">
-                    <img
-                      src={item.product.image}
-                      alt={item.product.name}
-                      className="w-20 h-20 object-cover rounded-lg"
-                    />
+              {(order.products || []).map((item, index) => {
+                const product = item?.product || {};
+                const imageSrc = product.image || item.image || '';
+                const name = product.name || item.name || 'Product';
+                const price = Number(item?.price ?? 0);
+                const qty = Number(item?.quantity ?? 0);
+                return (
+                  <div key={index} className="p-6 flex items-center gap-6">
+                    <div className="flex-shrink-0">
+                      {imageSrc ? (
+                        <img
+                          src={imageSrc}
+                          alt={name}
+                          className="w-20 h-20 object-cover rounded-lg"
+                        />
+                      ) : (
+                        <div className="w-20 h-20 rounded-lg bg-gray-200 flex items-center justify-center text-gray-500">No Image</div>
+                      )}
+                    </div>
+                    <div className="flex-grow">
+                      <h3 className="font-medium text-gray-800">{name}</h3>
+                      <p className="text-sm text-gray-600">
+                        Quantity: {qty} × £{price.toFixed(2)}
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <p className="font-medium text-gray-800">
+                        £{(qty * price).toFixed(2)}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex-grow">
-                    <h3 className="font-medium text-gray-800">{item.product.name}</h3>
-                    <p className="text-sm text-gray-600">
-                      Quantity: {item.quantity} × £{item.price.toFixed(2)}
-                    </p>
-                  </div>
-                  <div className="flex-shrink-0">
-                    <p className="font-medium text-gray-800">
-                      £{(item.quantity * item.price).toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Order Footer */}
@@ -191,8 +202,8 @@ const OrderHistory = () => {
                   <p className="font-medium text-gray-800 mb-1">Shipping Address:</p>
                   <p>{order.shippingAddress.street}</p>
                   <p>
-                    {order.shippingAddress.city}, {order.shippingAddress.state}{' '}
-                    {order.shippingAddress.zipCode}
+                    {order.shippingAddress.city}{order.shippingAddress.state ? `, ${order.shippingAddress.state}` : ''}{' '}
+                    {order.shippingAddress.postcode || order.shippingAddress.zipCode || ''}
                   </p>
                   <p>{order.shippingAddress.country}</p>
                 </div>
@@ -205,4 +216,4 @@ const OrderHistory = () => {
   );
 };
 
-export default OrderHistory; 
+export default OrderHistory;

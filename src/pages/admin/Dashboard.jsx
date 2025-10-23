@@ -9,7 +9,7 @@ import {
   ArrowDownIcon,
   ExclamationCircleIcon
 } from '@heroicons/react/24/outline';
-import api from '../../utils/axios';
+import adminApi from '../../utils/adminAxios';
 import { toast } from 'react-hot-toast';
 
 const Dashboard = () => {
@@ -37,7 +37,7 @@ const Dashboard = () => {
       setLoading(true);
       setError(null);
       
-      const response = await api.get('/api/admin/stats');
+      const response = await adminApi.get('/api/admin/stats');
       
       if (response.data.success) {
         setStats(response.data.data.stats);
@@ -51,7 +51,7 @@ const Dashboard = () => {
       toast.error(error.response?.data?.message || 'Failed to load dashboard data');
       
       if (error.response?.status === 401 || error.response?.status === 403) {
-        navigate('/login');
+        navigate('/admin/login');
       }
     } finally {
       setLoading(false);
@@ -243,4 +243,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard; 
+export default Dashboard;

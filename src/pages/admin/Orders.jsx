@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
-import api from '../../utils/axios';
+import adminApi from '../../utils/adminAxios';
 import toast from 'react-hot-toast';
 
 const AdminOrders = () => {
@@ -11,13 +11,16 @@ const AdminOrders = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState(null);
+  // Add local edited status map and updating tracker
+  const [editedStatuses, setEditedStatuses] = useState({});
+  const [updatingId, setUpdatingId] = useState(null);
 
   const fetchOrders = async (page = 1) => {
     try {
       setLoading(true);
       // Get stats to update dashboard
-      await api.get(`/api/admin/stats`);
-      const { data } = await api.get(`/api/orders?page=${page}&limit=50`);
+      await adminApi.get(`/api/admin/stats`);
+      const { data } = await adminApi.get(`/api/orders?page=${page}&limit=50`);
       
       if (data && data.success && Array.isArray(data.orders)) {
         setOrders(data.orders);
@@ -32,6 +35,9 @@ const AdminOrders = () => {
       console.error('Error fetching orders:', error);
       setError(error.response?.data?.message || 'Failed to load orders');
       toast.error(error.response?.data?.message || 'Failed to load orders');
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        navigate('/admin/login');
+      }
     } finally {
       setLoading(false);
     }
@@ -41,14 +47,35 @@ const AdminOrders = () => {
     fetchOrders();
   }, []);
 
-  const handleStatusChange = async (orderId, newStatus) => {
+  // Change: only update local state; real update happens on clicking Update
+  const handleStatusChange = (orderId, newStatus) => {
+    setEditedStatuses((prev) => ({ ...prev, [orderId]: newStatus }));
+  };
+
+  // New: Update button handler to persist status to backend
+  const handleUpdateStatus = async (orderId) => {
+    const newStatus = editedStatuses[orderId];
+    const original = orders.find((o) => o.id === orderId)?.status;
+    if (!newStatus || newStatus === original) return;
+
     try {
-      await api.put(`/api/orders/${orderId}/status`, { orderStatus: newStatus });
+      setUpdatingId(orderId);
+      await adminApi.put(`/api/orders/${orderId}/status`, { orderStatus: newStatus });
       toast.success('Order status updated successfully');
-      fetchOrders(currentPage);
+      await fetchOrders(currentPage);
+      setEditedStatuses((prev) => {
+        const copy = { ...prev };
+        delete copy[orderId];
+        return copy;
+      });
     } catch (error) {
       console.error('Error updating order status:', error);
       toast.error(error.response?.data?.message || 'Failed to update order status');
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        navigate('/admin/login');
+      }
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -115,7 +142,7 @@ const AdminOrders = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <select
-                        value={order.status}
+                        value={editedStatuses[order.id] ?? order.status}
                         onChange={(e) => handleStatusChange(order.id, e.target.value)}
                         className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
                       >
@@ -125,10 +152,21 @@ const AdminOrders = () => {
                         <option value="cancelled">Cancelled</option>
                       </select>
                     </td>
+                    {/* Date column unchanged */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(order.date).toLocaleString()}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex gap-3">
+                      {/* Show Update only when changed */}
+                      {(editedStatuses[order.id] ?? order.status) !== order.status && (
+                        <button
+                          onClick={() => handleUpdateStatus(order.id)}
+                          disabled={updatingId === order.id}
+                          className="text-green-600 hover:text-green-800"
+                        >
+                          {updatingId === order.id ? 'Updating…' : 'Update'}
+                        </button>
+                      )}
                       <button
                         onClick={() => navigate(`/admin/orders/${order.id}`)}
                         className="text-blue-600 hover:text-blue-900"
@@ -183,7 +221,7 @@ const AdminOrders = () => {
                         onClick={() => handlePageChange(i + 1)}
                         className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                           currentPage === i + 1
-                            ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                            ? 'z-10 bg-blue-500 border-blue-500 text-blue-600'
                             : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
                         }`}
                       >
@@ -208,4 +246,4 @@ const AdminOrders = () => {
   );
 };
 
-export default AdminOrders; 
+export default AdminOrders;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
-import api from '../../utils/axios';
+import adminApi from '../../utils/adminAxios';
 import toast from 'react-hot-toast';
 import AddProductModal from '../../components/AddProductModal';
 
@@ -17,7 +17,7 @@ const AdminProducts = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/products');
+      const response = await adminApi.get('/api/products');
       setProducts(response.data);
       setError(null);
     } catch (err) {
@@ -164,4 +164,4 @@ const AdminProducts = () => {
   );
 };
 
-export default AdminProducts; 
+export default AdminProducts;

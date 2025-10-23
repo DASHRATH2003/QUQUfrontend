@@ -12,7 +12,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import api from '../../utils/axios';
+import adminApi from '../../utils/adminAxios';
 import { toast } from 'react-hot-toast';
 
 // Register ChartJS components
@@ -57,7 +57,7 @@ const Analytics = () => {
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/api/admin/analytics?timeRange=${timeRange}`);
+      const response = await adminApi.get(`/api/admin/analytics?timeRange=${timeRange}`);
       const data = response.data;
 
       // Update sales data
@@ -242,4 +242,4 @@ const Analytics = () => {
   );
 };
 
-export default Analytics; 
+export default Analytics;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAdminAuth } from '../../context/AdminAuthContext';
 import toast from 'react-hot-toast';
 
 const AdminLogin = () => {
@@ -9,9 +9,9 @@ const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, user, logout } = useAuth();
+  const { login, user, logout } = useAdminAuth();
 
-  // Clear any existing auth data when mounting the login page
+  // Clear any existing ADMIN auth data when mounting the login page
   useEffect(() => {
     logout();
   }, []);
@@ -32,17 +32,15 @@ const AdminLogin = () => {
       const success = await login(email, password);
       
       if (success) {
-        // Check if user is admin after login
-        const user = JSON.parse(localStorage.getItem('user'));
-        
-        if (user && user.isAdmin) {
+        // Check if admin flag is present after login
+        const admin = JSON.parse(localStorage.getItem('adminUser'));
+        if (admin && admin.isAdmin) {
           toast.success('Welcome back, Admin!');
-          // Navigate to the attempted URL or default to /admin
           const from = location.state?.from?.pathname || '/admin';
           navigate(from);
         } else {
           toast.error('Access denied. Admin only.');
-          logout(); // This will clear auth data and redirect
+          logout(); // Clear only admin auth
         }
       } else {
         toast.error('Invalid credentials');
@@ -117,4 +115,4 @@ const AdminLogin = () => {
   );
 };
 
-export default AdminLogin; 
+export default AdminLogin;

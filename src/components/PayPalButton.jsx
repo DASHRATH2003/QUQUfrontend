@@ -33,7 +33,7 @@ const PayPalButton = ({ formData }) => {
             // Format the postcode
             const formattedPostcode = formatUKPostcode(formData.postcode);
             
-            // Create order data
+            // Create initial order
             const orderData = {
                 items: cartItems.map(item => ({
                     name: item.name,
@@ -54,14 +54,21 @@ const PayPalButton = ({ formData }) => {
                 },
                 paymentMethod: 'PayPal',
                 paymentId: details.id,
-                paymentStatus: details.status.toLowerCase()
+                paymentStatus: 'pending',
+                deliveryOption: formData.deliveryOption || 'standard'
             };
 
-            console.log('Sending order data to backend:', orderData);
-
-            // Save order to backend
+            // Save initial order
             const response = await api.post('/api/orders', orderData);
-            console.log('Order created successfully:', response.data);
+            const order = response.data;
+            console.log('Initial order created:', order);
+
+            // Update payment status
+            const updateResponse = await api.put(`/api/orders/${order._id}/payment`, {
+                paymentId: details.id,
+                status: details.status.toLowerCase()
+            });
+            console.log('Payment status updated:', updateResponse.data);
             
             // Clear the cart
             clearCart();
@@ -70,7 +77,7 @@ const PayPalButton = ({ formData }) => {
             toast.success('Order placed successfully! Thank you for your purchase.');
             
             // Redirect to order confirmation
-            navigate(`/order-confirmation/${response.data._id}`);
+            navigate(`/order-confirmation/${order._id}`);
         } catch (error) {
             console.error('Error processing order:', error);
             console.error('Error details:', error.response?.data);
@@ -198,13 +205,6 @@ const PayPalButton = ({ formData }) => {
                     disabled={loading}
                 />
             </PayPalScriptProvider>
-
-            <div className="mt-4 text-center text-sm text-gray-500">
-                <p>Test PayPal Account:</p>
-                <p>Email: sb-47ej5q29397099@personal.example.com</p>
-                <p>Password: your-password</p>
-                <p className="mt-2">Example UK Postcode Format: SW1A 1AA</p>
-            </div>
         </div>
     );
 };

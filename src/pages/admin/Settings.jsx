@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import api from '../../utils/axios';
+import { useAdminAuth } from '../../context/AdminAuthContext';
+import adminApi from '../../utils/adminAxios';
 import { toast } from 'react-hot-toast';
 import { LockClosedIcon, BellIcon, UserCircleIcon, CogIcon } from '@heroicons/react/24/outline';
 
 const Settings = () => {
-  const { user, logout } = useAuth();
+  const { user, logout } = useAdminAuth();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
 
@@ -41,7 +41,7 @@ const Settings = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await api.put('/api/auth/profile', profileData);
+      const response = await adminApi.put('/api/auth/profile', profileData);
       toast.success('Profile updated successfully');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Error updating profile');
@@ -57,7 +57,7 @@ const Settings = () => {
     }
     setLoading(true);
     try {
-      await api.put('/api/auth/change-password', {
+      await adminApi.put('/api/auth/change-password', {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword
       });
@@ -77,7 +77,7 @@ const Settings = () => {
   const handleNotificationUpdate = async () => {
     setLoading(true);
     try {
-      await api.put('/api/admin/notifications', notificationSettings);
+      await adminApi.put('/api/admin/notifications', notificationSettings);
       toast.success('Notification settings updated');
     } catch (error) {
       toast.error('Error updating notification settings');
@@ -89,7 +89,7 @@ const Settings = () => {
   const handlePreferencesUpdate = async () => {
     setLoading(true);
     try {
-      await api.put('/api/admin/preferences', adminPreferences);
+      await adminApi.put('/api/admin/preferences', adminPreferences);
       toast.success('Preferences updated');
     } catch (error) {
       toast.error('Error updating preferences');
@@ -285,4 +285,4 @@ const Settings = () => {
   );
 };
 
-export default Settings; 
+export default Settings;

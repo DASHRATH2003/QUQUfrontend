@@ -9,6 +9,9 @@ const ManageOrders = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState(null);
+  // New state: buffer edited statuses and updating id
+  const [editedStatuses, setEditedStatuses] = useState({});
+  const [updatingId, setUpdatingId] = useState(null);
 
   const fetchOrders = async (page = 1) => {
     try {
@@ -35,14 +38,29 @@ const ManageOrders = () => {
     fetchOrders();
   }, []);
 
-  const handleStatusChange = async (orderId, newStatus) => {
+  const handleStatusChange = (orderId, newStatus) => {
+    setEditedStatuses((prev) => ({ ...prev, [orderId]: newStatus }));
+  };
+
+  const handleUpdateStatus = async (orderId) => {
+    const newStatus = editedStatuses[orderId];
+    const original = orders.find((o) => o.id === orderId)?.status;
+    if (!newStatus || newStatus === original) return;
     try {
-      await api.put(`/api/admin/orders/${orderId}/status`, { status: newStatus });
+      setUpdatingId(orderId);
+      await api.put(`/api/orders/${orderId}/status`, { orderStatus: newStatus });
       toast.success('Order status updated successfully');
-      fetchOrders(currentPage);
+      await fetchOrders(currentPage);
+      setEditedStatuses((prev) => {
+        const copy = { ...prev };
+        delete copy[orderId];
+        return copy;
+      });
     } catch (error) {
       console.error('Error updating order status:', error);
-      toast.error('Failed to update order status');
+      toast.error(error.response?.data?.message || 'Failed to update order status');
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -101,7 +119,7 @@ const ManageOrders = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <select
-                        value={order.status}
+                        value={editedStatuses[order.id] ?? order.status}
                         onChange={(e) => handleStatusChange(order.id, e.target.value)}
                         className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
                       >
@@ -114,7 +132,16 @@ const ManageOrders = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(order.date).toLocaleString()}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex gap-3">
+                      {(editedStatuses[order.id] ?? order.status) !== order.status && (
+                        <button
+                          onClick={() => handleUpdateStatus(order.id)}
+                          disabled={updatingId === order.id}
+                          className="text-green-600 hover:text-green-800"
+                        >
+                          {updatingId === order.id ? 'Updating…' : 'Update'}
+                        </button>
+                      )}
                       <button
                         onClick={() => {
                           // Show order details in a modal
@@ -172,7 +199,7 @@ const ManageOrders = () => {
                         onClick={() => handlePageChange(i + 1)}
                         className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                           currentPage === i + 1
-                            ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                            ? 'z-10 bg-blue-500 border-blue-500 text-blue-600'
                             : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
                         }`}
                       >
@@ -197,4 +224,4 @@ const ManageOrders = () => {
   );
 };
 
-export default ManageOrders; 
+export default ManageOrders;

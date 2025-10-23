@@ -1,9 +1,9 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAdminAuth } from '../context/AdminAuthContext';
 
 const AdminRoute = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, loading } = useAdminAuth();
   const location = useLocation();
 
   if (loading) {
@@ -24,4 +24,4 @@ const AdminRoute = ({ children }) => {
   return children;
 };
 
-export default AdminRoute; 
+export default AdminRoute;

@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  PlayIcon,
-} from "@heroicons/react/24/outline";
+import { ChevronLeftIcon, ChevronRightIcon, PlayIcon } from "@heroicons/react/24/outline";
 import { fragranceCollections } from "../data/fragrances";
 import { PlayIcon as SolidPlayIcon } from "@heroicons/react/24/solid";
 import { useCart } from "../context/CartContext";
 import Footer from "../components/Footer";
+import api from "../utils/axios";
 
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -19,70 +16,86 @@ const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedPrice, setSelectedPrice] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
+  const [banners, setBanners] = useState([]);
+  const [bannersLoading, setBannersLoading] = useState(true);
+  
   const scrollContainerRef = useRef(null);
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [currentReview, setCurrentReview] = useState(0);
 
-  const slides = [
+  // Fetch banners from backend
+  const fetchBanners = async () => {
+    try {
+      setBannersLoading(true);
+      const { data } = await api.get('/api/banners');
+      
+      const activeBanners = data.banners
+        ?.filter(banner => banner.isActive)
+        ?.sort((a, b) => (a.order || 0) - (b.order || 0)) || [];
+      
+      setBanners(activeBanners);
+    } catch (err) {
+      console.error('Failed to fetch banners:', err);
+      setBanners(getDefaultSlides());
+    } finally {
+      setBannersLoading(false);
+    }
+  };
+
+  // Default slides as fallback
+  const getDefaultSlides = () => [
     {
+      _id: "1",
       title: "Discover Your Signature Scent",
-      description:
-        "Explore our collection of unique fragrances crafted to express your personality.",
-      image: "/images/Discovery.jpg",
+      description: "Explore our collection of unique fragrances crafted to express your personality.",
+      imageUrl: "/images/Discovery.jpg",
+      linkUrl: "/shop",
+      buttonText: "SHOP NOW",
+      isActive: true,
+      order: 1
     },
     {
+      _id: "2",
       title: "Luxury in Every Drop",
-      description:
-        "Experience the art of perfumery with our premium collection.",
-      image: "/images/Laxury.jpeg",
+      description: "Experience the art of perfumery with our premium collection.",
+      imageUrl: "/images/Laxury.jpeg",
+      linkUrl: "/shop",
+      buttonText: "SHOP NOW",
+      isActive: true,
+      order: 2
     },
     {
+      _id: "3",
       title: "For Every Moment",
-      description:
-        "From day to night, find the perfect scent for every occasion.",
-      image: "/images/Forevery.jpg",
-    },
-    {
-      title: "Crafted with Love",
-      description: "Each fragrance tells a story, what will yours be?",
-      image: "/images/love.webp",
-    },
-    {
-      title: "Elegance Personified",
-      description: "Discover the essence of sophistication in every bottle.",
-      image:
-        "https://images.unsplash.com/photo-1541643600914-78b084683601?q=80&w=1000&auto=format&fit=crop",
-    },
-    {
-      title: "Pure Luxury Collection",
-      description: "Indulge in the finest fragrances from around the world.",
-      image:
-        "https://images.unsplash.com/photo-1619994403073-2cec844b8e63?q=80&w=1000&auto=format&fit=crop",
-    },
-    {
-      title: "Timeless Beauty",
-      description: "Classic scents that never go out of style.",
-      image:
-        "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?q=80&w=1000&auto=format&fit=crop",
-    },
-    {
-      title: "Modern Sophistication",
-      description: "Contemporary fragrances for the modern connoisseur.",
-      image:
-        "https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?q=80&w=1000&auto=format&fit=crop",
-    },
+      description: "From day to night, find the perfect scent for every occasion.",
+      imageUrl: "/images/Forevery.jpg",
+      linkUrl: "/shop",
+      buttonText: "SHOP NOW",
+      isActive: true,
+      order: 3
+    }
   ];
+
+  // Use banners or fallback to default slides
+  const slides = banners.length > 0 ? banners : getDefaultSlides();
 
   // Auto-rotate slides
   useEffect(() => {
+    if (slides.length === 0) return;
+    
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
-    }, 5000); // Changed from 2000 to 5000 for slower transitions
+    }, 5000);
 
     return () => clearInterval(timer);
   }, [slides.length]);
+
+  // Fetch banners on component mount
+  useEffect(() => {
+    fetchBanners();
+  }, []);
 
   // Auto-scroll for homepage images
   useEffect(() => {
@@ -92,14 +105,13 @@ const Home = () => {
     const scrollWidth = container.scrollWidth - container.clientWidth;
     const scrollInterval = setInterval(() => {
       setScrollPosition((prevPosition) => {
-        const newPosition = prevPosition + 0.5; // Changed from 1 to 0.5 for slower scroll
-        // Reset to start when reaching the end
+        const newPosition = prevPosition + 0.5;
         if (newPosition >= scrollWidth) {
           return 0;
         }
         return newPosition;
       });
-    }, 50); // Keep this timing for smooth animation
+    }, 50);
 
     return () => clearInterval(scrollInterval);
   }, []);
@@ -120,14 +132,11 @@ const Home = () => {
         e.preventDefault();
         e.stopPropagation();
 
-        // Prevent multiple clicks
         if (isAdding) return;
 
-        // Set loading state
         setIsAdding(true);
 
         try {
-          // Create cart item with all required data
           const cartItem = {
             id: fragrance.id,
             name: fragrance.name,
@@ -135,13 +144,11 @@ const Home = () => {
             image: fragrance.image,
             quantity: 1,
             description: fragrance.description,
-            collection: fragrance.collection, // Add collection info
+            collection: fragrance.collection,
           };
 
-          // Add to cart and show feedback
           addToCart(cartItem);
 
-          // Keep button disabled briefly for visual feedback
           setTimeout(() => {
             setIsAdding(false);
           }, 800);
@@ -156,7 +163,6 @@ const Home = () => {
     return (
       <div className="w-[240px] md:w-[280px] group">
         <div className="flex flex-col items-center">
-          {/* Image Container */}
           <Link to={`/product/${fragrance.id}`} className="w-full block">
             <div className="w-full aspect-[1/1] bg-[#FFF5F7] rounded-lg overflow-hidden mb-2 md:mb-3">
               <img
@@ -168,7 +174,6 @@ const Home = () => {
             </div>
           </Link>
 
-          {/* Product Info */}
           <div className="w-full text-center space-y-1 md:space-y-1.5">
             <Link to={`/product/${fragrance.id}`}>
               <h3 className="text-sm md:text-base font-medium text-gray-900 hover:text-pink-500">
@@ -274,16 +279,14 @@ const Home = () => {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentReview((prev) => (prev === reviews.length - 1 ? 0 : prev + 1));
-    }, 5000); // Changed from 2000 to 5000 for slower transitions
+    }, 5000);
 
     return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
-    // Log when component mounts
     console.log("Video component mounted");
 
-    // Check if video file exists
     fetch("/videoperfume.mp4")
       .then((response) => {
         if (!response.ok) {
@@ -299,7 +302,7 @@ const Home = () => {
       });
   }, []);
 
-  // Video error handler with more detailed error reporting
+  // Video error handler
   const handleVideoError = (e) => {
     console.error("Video error:", e);
     const video = videoRef.current;
@@ -324,7 +327,6 @@ const Home = () => {
     setVideoError(false);
     setVideoMessage("Video loaded successfully!");
 
-    // Try to play the video
     const playVideo = async () => {
       try {
         await videoRef.current.play();
@@ -379,142 +381,150 @@ const Home = () => {
 
   return (
     <div className="space-y-16">
-      {/* Hero Section with Carousel */}
+      {/* BannerStrip को REMOVE कर दिया गया है - सिर्फ scrolling carousel ही show होगा */}
+      
+      {/* Hero Section with Dynamic Carousel */}
       <div className="relative bg-white min-h-[300px] md:min-h-[500px] overflow-hidden">
-        {/* Carousel Container */}
-        <div
-          className="flex transition-transform duration-1000 ease-in-out h-full"
-          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-        >
-          {slides.map((slide) => (
+        {bannersLoading ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
+          </div>
+        ) : (
+          <>
             <div
-              key={slide.title}
-              className="w-full h-full flex-shrink-0 flex flex-col md:grid md:grid-cols-2"
+              className="flex transition-transform duration-1000 ease-in-out h-full"
+              style={{ transform: `translateX(-${currentSlide * 100}%)` }}
             >
-              {/* Left Content Side */}
-              <div className="flex flex-col justify-center items-start p-4 md:p-6 lg:px-28 pt-4 md:pt-8 pb-4 md:pb-32 bg-white order-2 md:order-1">
-                <h1 className="text-lg md:text-2xl lg:text-3xl font-semibold tracking-tight text-gray-600 mb-2 md:mb-3 max-w-sm">
-                  {slide.title}
-                </h1>
-                <h2 className="text-sm md:text-base lg:text-xl font-semibold tracking-tight text-gray-600 mb-3 md:mb-6 max-w-sm">
-                  {slide.description}
-                </h2>
-                <Link
-                  to="/shop"
-                  className="inline-block bg-pink-100 hover:bg-pink-200 text-black py-2 md:py-2.5 px-4 md:px-8 lg:px-10 text-sm md:text-base lg:text-lg font-medium transition-colors duration-200"
+              {slides.map((slide, index) => (
+                <div
+                  key={slide._id || index}
+                  className="w-full h-full flex-shrink-0 flex flex-col md:grid md:grid-cols-2"
                 >
-                  SHOP NOW
-                </Link>
-              </div>
+                  {/* Left Content Side */}
+                  <div className="flex flex-col justify-center items-start p-4 md:p-6 lg:px-28 pt-4 md:pt-8 pb-4 md:pb-32 bg-white order-2 md:order-1">
+                    <h1 className="text-lg md:text-2xl lg:text-3xl font-semibold tracking-tight text-gray-600 mb-2 md:mb-3 max-w-sm">
+                      {slide.title}
+                    </h1>
+                    <h2 className="text-sm md:text-base lg:text-xl font-semibold tracking-tight text-gray-600 mb-3 md:mb-6 max-w-sm">
+                      {slide.description}
+                    </h2>
+                    <Link
+                      to={slide.linkUrl || "/shop"}
+                      className="inline-block bg-pink-100 hover:bg-pink-200 text-black py-2 md:py-2.5 px-4 md:px-8 lg:px-10 text-sm md:text-base lg:text-lg font-medium transition-colors duration-200"
+                    >
+                      {slide.buttonText || "SHOP NOW"}
+                    </Link>
+                  </div>
 
-              {/* Right Image Side */}
-              <div className="relative h-[200px] md:h-[300px] lg:h-[350px] order-1 md:order-2">
-                <img
-                  src={slide.image}
-                  alt={slide.title}
-                  className="w-full h-full object-cover object-center"
-                />
-              </div>
+                  {/* Right Image Side */}
+                  <div className="relative h-[200px] md:h-[300px] lg:h-[350px] order-1 md:order-2">
+                    <img
+                      src={slide.imageUrl}
+                      alt={slide.title}
+                      className="w-full h-full object-cover object-center"
+                      onError={(e) => {
+                        e.target.src = "/images/placeholder.jpg";
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <div className="absolute bottom-0 md:bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
-  {slides.map((_, index) => (
-    <button
-      key={index}
-      onClick={() => setCurrentSlide(index)}
-      className={`w-3 h-3 rounded-full ${
-        currentSlide === index ? 'bg-pink-500' : 'bg-gray-300'
-      }`}
-    ></button>
-  ))}
-</div>
+
+            <div className="absolute bottom-0 md:bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+              {slides.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentSlide(index)}
+                  className={`w-3 h-3 rounded-full ${
+                    currentSlide === index ? 'bg-pink-500' : 'bg-gray-300'
+                  }`}
+                ></button>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
+      {/* Rest of your existing code remains same... */}
       {/* Collection Section */}
       <div className="w-full bg-white mt-16 md:-mt-24 lg:-mt-28 relative z-10">
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    {/* Title and See More Button */}
-    <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 md:mb-12 space-y-4 md:space-y-0">
-      <div className="text-center md:text-left">
-        <h2 className="text-3xl md:text-4xl font-bold text-pink-500">
-          All Collections
-        </h2>
-        <p className="mt-2 text-base md:text-lg text-gray-600">
-          Find your perfect fragrance
-        </p>
-      </div>
-      <Link
-        to="/shop"
-        className="inline-flex items-center justify-center px-6 py-2 md:py-3 text-base font-medium text-black bg-pink-100 hover:bg-pink-200 rounded-md transition-colors duration-200"
-      >
-        See More
-        <svg
-          className="ml-2 w-4 h-4 md:w-5 md:h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 5l7 7-7 7"
-          />
-        </svg>
-      </Link>
-    </div>
-
-    {/* Product Cards Section */}
-    <div className="relative">
-      <div className="overflow-x-auto hide-scrollbar">
-        <div className="inline-flex space-x-4 md:space-x-6 pb-4">
-          {allFragrances
-            .filter((product) => {
-              if (selectedType !== "all" && product.type !== selectedType)
-                return false;
-              if (
-                selectedCategory !== "all" &&
-                product.category !== selectedCategory
-              )
-                return false;
-              if (selectedPrice !== "all") {
-                const price = parseFloat(product.price);
-                switch (selectedPrice) {
-                  case "under10":
-                    return price < 10;
-                  case "10-20":
-                    return price >= 10 && price <= 20;
-                  case "over20":
-                    return price > 20;
-                  default:
-                    return true;
-                }
-              }
-              return true;
-            })
-            .map((product) => (
-              <div
-                key={product.id}
-                className="w-[160px] sm:w-[200px] md:w-[260px] flex-shrink-0 transition-transform hover:scale-105 duration-300"
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 md:mb-12 space-y-4 md:space-y-0">
+            <div className="text-center md:text-left">
+              <h2 className="text-3xl md:text-4xl font-bold text-pink-500">
+                All Collections
+              </h2>
+              <p className="mt-2 text-base md:text-lg text-gray-600">
+                Find your perfect fragrance
+              </p>
+            </div>
+            <Link
+              to="/shop"
+              className="inline-flex items-center justify-center px-6 py-2 md:py-3 text-base font-medium text-black bg-pink-100 hover:bg-pink-200 rounded-md transition-colors duration-200"
+            >
+              See More
+              <svg
+                className="ml-2 w-4 h-4 md:w-5 md:h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                <FragranceCard fragrance={product} />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </Link>
+          </div>
+
+          <div className="relative">
+            <div className="overflow-x-auto hide-scrollbar">
+              <div className="inline-flex space-x-4 md:space-x-6 pb-4">
+                {allFragrances
+                  .filter((product) => {
+                    if (selectedType !== "all" && product.type !== selectedType)
+                      return false;
+                    if (
+                      selectedCategory !== "all" &&
+                      product.category !== selectedCategory
+                    )
+                      return false;
+                    if (selectedPrice !== "all") {
+                      const price = parseFloat(product.price);
+                      switch (selectedPrice) {
+                        case "under10":
+                          return price < 10;
+                        case "10-20":
+                          return price >= 10 && price <= 20;
+                        case "over20":
+                          return price > 20;
+                        default:
+                          return true;
+                      }
+                    }
+                    return true;
+                  })
+                  .map((product) => (
+                    <div
+                      key={product.id}
+                      className="w-[160px] sm:w-[200px] md:w-[260px] flex-shrink-0 transition-transform hover:scale-105 duration-300"
+                    >
+                      <FragranceCard fragrance={product} />
+                    </div>
+                  ))}
               </div>
-            ))}
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-</div>
-
-
-      {/* Instagram Style Gallery */}
 
       {/* Rotating Brands Section */}
       <div className="w-full bg-pink-50 py-12 overflow-hidden">
         <div className="max-w-7xl mx-auto">
           <div className="relative">
-            {/* First row - moving right */}
             <div className="flex animate-marquee whitespace-nowrap">
               {[...brands, ...brands].map((brand, index) => (
                 <div
@@ -528,7 +538,6 @@ const Home = () => {
               ))}
             </div>
 
-            {/* Second row - moving left */}
             <div className="flex animate-marquee2 whitespace-nowrap mt-8">
               {[...brands.reverse(), ...brands].map((brand, index) => (
                 <div
@@ -545,6 +554,7 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Video Section */}
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
@@ -565,7 +575,6 @@ const Home = () => {
           className="relative rounded-lg overflow-hidden shadow-xl cursor-pointer transition-all duration-500"
           onClick={handleVideoClick}
         >
-          {/* Cover Design (shown when video is hidden) */}
           {!showVideo && (
             <div className="relative">
               <div className="aspect-video bg-gradient-to-r from-pink-100 to-purple-100 flex items-center justify-center">
@@ -588,7 +597,6 @@ const Home = () => {
             </div>
           )}
 
-          {/* Video (hidden initially) */}
           <div
             className={`transition-all duration-500 ${
               showVideo ? "opacity-100" : "opacity-0 hidden"
@@ -621,12 +629,9 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Customer Reviews Section */}
-
       {/* Bottom Products Showcase */}
       <div className="w-full bg-pink-50">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row">
-          {/* Left Image Side */}
           <div className="w-full md:w-1/2 relative h-[300px] md:h-[400px] overflow-hidden">
             <div
               className="flex transition-transform duration-500 ease-out h-full"
@@ -649,7 +654,6 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Right Content Side */}
           <div className="w-full md:w-1/2 flex flex-col justify-center items-start p-8 md:p-16">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 mb-4">
               Featured Collection
@@ -668,6 +672,7 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Customer Reviews Section */}
       <div className="w-full bg-white py-16 pt-8">
         <div className="max-w-4xl mx-auto px-4">
           <div className="text-center mb-12">
@@ -716,7 +721,6 @@ const Home = () => {
               </div>
             </div>
 
-            {/* Navigation Dots */}
             <div className="flex justify-center mt-6 space-x-2">
               {reviews.map((_, index) => (
                 <button
@@ -732,12 +736,11 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Features Section */}
       <div className="bg-gray-100 ">
         <div className="max-w-7xl mx-auto pt-6 pb-12 px-4 sm:px-6 lg:pt-8 lg:pb-16 lg:px-8">
-          {/* Ingredients/Features Section */}
           <div className="max-w-6xl mx-auto mb-16">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {/* Jojoba Oil */}
               <div className="text-center">
                 <div className="w-32 h-32 mx-auto mb-4 bg-pink-50 rounded-full overflow-hidden p-4">
                   <img
@@ -753,7 +756,6 @@ const Home = () => {
                 </p>
               </div>
 
-              {/* Avacado Oil */}
               <div className="text-center">
                 <div className="w-32 h-32 mx-auto mb-4 bg-pink-50 rounded-full overflow-hidden p-4">
                   <img
@@ -769,7 +771,6 @@ const Home = () => {
                 </p>
               </div>
 
-              {/* Ozokorite */}
               <div className="text-center">
                 <div className="w-32 h-32 mx-auto mb-4 bg-pink-50 rounded-full overflow-hidden p-4">
                   <img
@@ -785,7 +786,6 @@ const Home = () => {
                 </p>
               </div>
 
-              {/* Shea Butter */}
               <div className="text-center">
                 <div className="w-32 h-32 mx-auto mb-4 bg-pink-50 rounded-full overflow-hidden p-4">
                   <img
@@ -843,7 +843,6 @@ const Home = () => {
             </p>
           </div>
 
-          {/* Instagram Feed Grid */}
           <div className="grid grid-cols-3 gap-2 md:gap-4 max-w-4xl mx-auto">
             {instagramImages
               .slice(0, showMoreImages ? 6 : 6)
@@ -873,7 +872,7 @@ const Home = () => {
         </div>
       </div>
 
-      {/* New Featured Products Section */}
+      {/* Featured Products Section */}
       <div className="w-full bg-gradient-to-r from-pink-50 to-purple-50 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -890,9 +889,7 @@ const Home = () => {
             </p>
           </div>
 
-          {/* Featured Products Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-8">
-            {/* Featured Product 1 */}
             <div className="group relative overflow-hidden rounded-lg shadow-lg transform transition-transform duration-300 hover:scale-105">
               <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden">
                 <img
@@ -914,7 +911,6 @@ const Home = () => {
               </div>
             </div>
 
-            {/* Featured Product 2 */}
             <div className="group relative overflow-hidden rounded-lg shadow-lg transform transition-transform duration-300 hover:scale-105">
               <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden">
                 <img
@@ -936,7 +932,6 @@ const Home = () => {
               </div>
             </div>
 
-            {/* Featured Product 3 */}
             <div className="group relative overflow-hidden rounded-lg shadow-lg transform transition-transform duration-300 hover:scale-105">
               <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden">
                 <img
@@ -970,7 +965,7 @@ const Home = () => {
         </div>
       </div>
 
-      {/* New Content Section */}
+      {/* Why Choose Us Section */}
       <div className="w-full bg-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -985,7 +980,6 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Quality Card */}
             <div className="bg-gradient-to-br from-pink-50 to-purple-50 p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
               <div className="flex items-center justify-center h-12 w-12 rounded-full bg-pink-100 mx-auto mb-6">
                 <svg className="h-6 w-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -998,7 +992,6 @@ const Home = () => {
               </p>
             </div>
 
-            {/* Sustainability Card */}
             <div className="bg-gradient-to-br from-pink-50 to-purple-50 p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
               <div className="flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mx-auto mb-6">
                 <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1011,7 +1004,6 @@ const Home = () => {
               </p>
             </div>
 
-            {/* Innovation Card */}
             <div className="bg-gradient-to-br from-pink-50 to-purple-50 p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
               <div className="flex items-center justify-center h-12 w-12 rounded-full bg-purple-100 mx-auto mb-6">
                 <svg className="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1025,7 +1017,6 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Features List */}
           <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-6">
               <h3 className="text-2xl font-bold text-gray-900 mb-6">What Sets Us Apart</h3>
@@ -1100,7 +1091,6 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Call to Action */}
           <div className="mt-16 text-center">
             <div className="inline-flex flex-col items-center">
               <p className="text-lg text-gray-600 mb-6 max-w-2xl">
@@ -1118,12 +1108,9 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Add Footer at the end */}
       <Footer />
     </div>
   );
 };
 
 export default Home;
-
-

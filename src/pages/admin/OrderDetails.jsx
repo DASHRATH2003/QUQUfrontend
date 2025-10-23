@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from '../../utils/axios';
+import adminApi from '../../utils/adminAxios';
 
 const OrderDetails = () => {
   const { orderId } = useParams();
@@ -11,7 +11,7 @@ const OrderDetails = () => {
   const fetchOrderDetails = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/orders/${orderId}`);
+      const response = await adminApi.get(`/api/orders/${orderId}`);
       setOrder(response.data);
       setError(null);
     } catch (err) {
@@ -55,7 +55,9 @@ const OrderDetails = () => {
 
   // Add function to calculate order total
   const calculateOrderTotal = (products) => {
-    return products?.reduce((total, item) => total + (item.quantity * item.price), 0) || 0;
+    const subtotal = products?.reduce((total, item) => total + (item.quantity * item.price), 0) || 0;
+    const deliveryCost = order.deliveryOption === 'express' ? 4.99 : 0;
+    return subtotal + deliveryCost;
   };
 
   return (
@@ -265,12 +267,14 @@ const OrderDetails = () => {
                 <div className="border-t border-gray-100 pt-4 space-y-3">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Subtotal</span>
-                    <span className="text-gray-900 font-medium">£{calculateOrderTotal(order.products).toFixed(2)}</span>
+                    <span className="text-gray-900 font-medium">£{order.products?.reduce((total, item) => total + (item.quantity * item.price), 0).toFixed(2)}</span>
                   </div>
                   
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Delivery</span>
-                    <span className="text-green-600 font-medium">FREE</span>
+                    <span className={order.deliveryOption === 'express' ? 'text-gray-900 font-medium' : 'text-green-600 font-medium'}>
+                      {order.deliveryOption === 'express' ? '£4.99' : 'FREE'}
+                    </span>
                   </div>
 
                   {/* Total */}

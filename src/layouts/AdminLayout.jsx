@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAdminAuth } from '../context/AdminAuthContext';
 import {
   HomeIcon,
   ShoppingBagIcon,
@@ -10,13 +10,14 @@ import {
   Cog6ToothIcon,
   ArrowLeftOnRectangleIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  PhotoIcon
 } from '@heroicons/react/24/outline';
 
 const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout } = useAdminAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navigation = [
@@ -25,6 +26,7 @@ const AdminLayout = () => {
     { name: 'Products', href: '/admin/products', icon: CubeIcon },
     { name: 'Users', href: '/admin/users', icon: UsersIcon },
     { name: 'Analytics', href: '/admin/analytics', icon: ChartBarIcon },
+    { name: 'Banners', href: '/admin/banners', icon: PhotoIcon },
     { name: 'Settings', href: '/admin/settings', icon: Cog6ToothIcon },
   ];
 
@@ -144,4 +146,4 @@ const AdminLayout = () => {
   );
 };
 
-export default AdminLayout; 
+export default AdminLayout;

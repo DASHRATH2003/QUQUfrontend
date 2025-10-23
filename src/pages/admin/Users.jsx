@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { UserIcon } from '@heroicons/react/24/outline';
-import api from '../../utils/axios';
+import adminApi from '../../utils/adminAxios';
 import toast from 'react-hot-toast';
 
 const AdminUsers = () => {
@@ -15,7 +15,7 @@ const AdminUsers = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/admin/users');
+      const response = await adminApi.get('/api/admin/users');
       setUsers(response.data);
       setError(null);
     } catch (err) {
@@ -29,7 +29,7 @@ const AdminUsers = () => {
 
   const handleToggleAdmin = async (userId, isAdmin) => {
     try {
-      await api.put(`/api/admin/users/${userId}/role`, {
+      await adminApi.put(`/api/admin/users/${userId}/role`, {
         isAdmin: !isAdmin
       });
       toast.success('User role updated successfully');
@@ -144,4 +144,4 @@ const AdminUsers = () => {
   );
 };
 
-export default AdminUsers; 
+export default AdminUsers;

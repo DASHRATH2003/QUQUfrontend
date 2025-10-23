@@ -4,6 +4,7 @@ import { CartProvider } from './context/CartContext.jsx';
 import { SearchProvider } from './context/SearchContext';
 import { AuthProvider } from './context/AuthContext';
 import { OrderProvider } from './context/OrderContext';
+import { AdminAuthProvider } from './context/AdminAuthContext';
 
 // Layouts
 import AdminLayout from './layouts/AdminLayout';
@@ -18,6 +19,7 @@ import AdminProducts from './pages/admin/Products';
 import AdminUsers from './pages/admin/Users';
 import Settings from './pages/admin/Settings';
 import Analytics from './pages/admin/Analytics';
+import AdminBanners from './pages/admin/Banners';
 
 // Public Pages
 import Home from './pages/Home';
@@ -90,6 +92,7 @@ const AppContent = () => {
           <Route path="users" element={<AdminUsers />} />
           <Route path="settings" element={<Settings />} />
           <Route path="analytics" element={<Analytics />} />
+          <Route path="banners" element={<AdminBanners />} />
         </Route>
 
         {/* Auth Routes */}
@@ -104,6 +107,7 @@ function App() {
   return (
     <Router>
       <AuthProvider>
+          <AdminAuthProvider>
         <SearchProvider>
           <CartProvider>
             <OrderProvider>
@@ -111,6 +115,7 @@ function App() {
             </OrderProvider>
           </CartProvider>
         </SearchProvider>
+        </AdminAuthProvider>
       </AuthProvider>
     </Router>
   );
