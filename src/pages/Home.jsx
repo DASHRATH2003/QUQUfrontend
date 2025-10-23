@@ -832,45 +832,45 @@ const Home = () => {
       </div>
 
       {/* Instagram Feed Section */}
-      <div className="w-full bg-white pt-8 py-8 md:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-6 md:mb-12">
-            <h2 className="text-xl md:text-3xl font-bold text-gray-900">
-              Follow us on Instagram
-            </h2>
-            <p className="mt-2 text-sm md:text-lg text-gray-600">
-              Trending products
-            </p>
-          </div>
+    <div className="w-full bg-white pt-4 py-4 md:py-8">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="text-center mb-4 md:mb-8">
+      <h2 className="text-xl md:text-3xl font-bold text-gray-900">
+        Follow us on Instagram
+      </h2>
+      <p className="mt-2 text-sm md:text-lg text-gray-600">
+        Trending products
+      </p>
+    </div>
 
-          <div className="grid grid-cols-3 gap-2 md:gap-4 max-w-4xl mx-auto">
-            {instagramImages
-              .slice(0, showMoreImages ? 6 : 6)
-              .map((image, index) => (
-                <div
-                  key={index}
-                  className="relative group overflow-hidden aspect-square"
-                >
-                  <img
-                    src={image.src}
-                    alt={image.alt}
-                    className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300"></div>
-                </div>
-              ))}
+    <div className="grid grid-cols-3 gap-2 md:gap-4 max-w-4xl mx-auto">
+      {instagramImages
+        .slice(0, showMoreImages ? 6 : 6)
+        .map((image, index) => (
+          <div
+            key={index}
+            className="relative group overflow-hidden aspect-square"
+          >
+            <img
+              src={image.src}
+              alt={image.alt}
+              className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-110"
+            />
+            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300"></div>
           </div>
+        ))}
+    </div>
 
-          <div className="text-center mt-4 md:mt-8">
-            <Link
-              to="/shop"
-              className="inline-block bg-pink-100 hover:bg-pink-200 text-black px-4 md:px-8 py-2 md:py-3 rounded-md text-sm md:text-base font-medium transition-colors duration-200"
-            >
-              View All Products
-            </Link>
-          </div>
-        </div>
-      </div>
+    <div className="text-center mt-4 md:mt-6">
+      <Link
+        to="/shop"
+        className="inline-block bg-pink-100 hover:bg-pink-200 text-black px-4 md:px-8 py-2 md:py-3 rounded-md text-sm md:text-base font-medium transition-colors duration-200"
+      >
+        View All Products
+      </Link>
+    </div>
+  </div>
+</div>
 
       {/* Featured Products Section */}
       <div className="w-full bg-gradient-to-r from-pink-50 to-purple-50 py-16">
